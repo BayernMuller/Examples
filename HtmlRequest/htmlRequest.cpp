@@ -8,8 +8,12 @@ using namespace std;
 
 int main() 
 {
-	string url = "www.google.com";
-	string get_http = "GET / HTTP/1.1\r\nHost: " + url + "\r\nConnection: close\r\n\r\n";
+	const char* url = "www.google.com";
+	ostringstream oss;
+	oss << "GET / HTTP/1.1\r\n";
+	oss << "Host: " << url << "\r\n";
+	oss << "Connection: close\r\n";
+	oss << "\r\n";
 
 	WSADATA wsaData;
 	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) 
@@ -17,36 +21,35 @@ int main()
 		return -1;
 	}
 
-	SOCKET Socket;
-	Socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	SOCKET sock;
+	sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-	hostent* host;
-	host = gethostbyname(url.c_str());
+	hostent* host = gethostbyname(url);
+	SOCKADDR_IN address;
+	address.sin_port = htons(80);
+	address.sin_family = AF_INET;
+	address.sin_addr.s_addr = *((int*)host->h_addr);
 
-	SOCKADDR_IN SockAddr;
-	SockAddr.sin_port = htons(80);
-	SockAddr.sin_family = AF_INET;
-	SockAddr.sin_addr.s_addr = *((unsigned long*)host->h_addr);
-
-	if (connect(Socket, (SOCKADDR*)(&SockAddr), sizeof(SockAddr)) != 0) 
+	if (connect(sock, (SOCKADDR*)(&address), sizeof(address))) 
 	{
 		return -1;
 	}
 
-	send(Socket, get_http.c_str(), get_http.size(), 0);
+	string str = move(oss.str());
+	send(sock, str.c_str(), str.size(), 0);
 
 	string html;
 	html.reserve(10000);
 
 	char buffer[10000];
-	while (recv(Socket, buffer, 10000, 0) > 0)
+	while (recv(sock, buffer, 10000, 0) > 0)
 	{
 		html += buffer;
 	}
-	
+
 	cout << html.c_str() << endl;
 
-	closesocket(Socket);
+	closesocket(sock);
 	WSACleanup();
 	cin.get();
 	return 0;
