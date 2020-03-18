@@ -1,16 +1,11 @@
 #include <iostream>
 #include "WindowsFinder.h"
+#include <list>
+#include <vector>
 using namespace std;
 
 int main()
 {
-	vector<HWND> vec;
-	WindowsFinder::Find(&vec);
-	wcout.imbue(locale("kor"));
-	for (auto handle : vec)
-	{
-		wchar_t str[256];
-		GetWindowText(handle, str, 256);
-		wcout << str << endl;
-	}
+	list<HWND> vec;
+	WindowsFinder<list<HWND>>::Find(&vec);
 }
