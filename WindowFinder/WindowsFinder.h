@@ -1,7 +1,7 @@
 #pragma once
 #include <Windows.h>
 
-template<class Container>
+template<class Container = void>
 class WindowsFinder
 { 
 public:
