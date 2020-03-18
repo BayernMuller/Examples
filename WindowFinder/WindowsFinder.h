@@ -15,6 +15,26 @@ public:
 		return EnumWindows(lpEnumFunc, LPARAM(set));
 	}
 
+	static WNDENUMPROC GetCallbackFunc()
+	{
+		return GetWindowsList;
+	}
+
+	static wchar_t* GetWindowName(wchar_t str[], HWND hWnd, std::size_t maxsize)
+	{
+		if (!::IsWindow(hWnd))
+			return nullptr;
+		::GetWindowText(hWnd, str, maxsize);
+		return str;
+	}
+
+	static wchar_t* GetWindowClass(wchar_t str[], HWND hWnd, std::size_t maxsize)
+	{
+		if (!::IsWindow(hWnd))
+			return nullptr;
+		::GetClassName(hWnd, str, maxsize);
+		return str;
+	}
 
 private:
 	static BOOL __stdcall GetWindowsList(HWND hWnd, LPARAM lParam)
