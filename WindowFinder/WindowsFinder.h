@@ -1,20 +1,22 @@
 #pragma once
 #include <Windows.h>
 
-template<class Container = void>
 class WindowsFinder
 { 
 public:
+	template<class Container>
 	static bool Find(Container* set)
 	{
-		return EnumWindows(&WindowsFinder::GetWindowsList, LPARAM(set));
+		return EnumWindows(&WindowsFinder::GetWindowsList<Container>, LPARAM(set));
 	}
 	
+	template<class Container>
 	static bool Find(WNDENUMPROC lpEnumFunc, Container* set)
 	{
 		return EnumWindows(lpEnumFunc, LPARAM(set));
 	}
 
+	template<class Container>
 	static WNDENUMPROC GetCallbackFunc()
 	{
 		return GetWindowsList;
@@ -37,6 +39,7 @@ public:
 	}
 
 private:
+	template<class Container>
 	static BOOL __stdcall GetWindowsList(HWND hWnd, LPARAM lParam)
 	{
 		auto* con = reinterpret_cast<Container*>(lParam);

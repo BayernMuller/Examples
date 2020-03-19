@@ -6,14 +6,23 @@ using namespace std;
 
 int main()
 {
-	list<HWND> vec;
-	WindowsFinder<list<HWND>>::Find(&vec);
+	list<HWND> lis;
+	WindowsFinder::Find(&lis);
+
+	vector<HWND> vec;
+	WindowsFinder::Find(&vec);
 
 	wcout.imbue(locale("kor"));
 	wchar_t str[256] = { 0 };
 	for (auto i : vec)
 	{
-		WindowsFinder<>::GetWindowName(str, i, 256);
+		WindowsFinder::GetWindowName(str, i, 256);
+		wcout << str << endl;
+	}
+	cout << "\n\n";
+	for (auto i : lis)
+	{
+		WindowsFinder::GetWindowClass(str, i, 256);
 		wcout << str << endl;
 	}
 }
