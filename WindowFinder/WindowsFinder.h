@@ -19,7 +19,7 @@ public:
 	template<class Container>
 	static WNDENUMPROC GetCallbackFunc()
 	{
-		return GetWindowsList;
+		return GetWindowsList<Container>;
 	}
 
 	static wchar_t* GetWindowName(wchar_t str[], HWND hWnd, std::size_t maxsize)

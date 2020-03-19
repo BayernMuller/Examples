@@ -11,7 +11,7 @@ int main()
 
 	vector<HWND> vec;
 	WindowsFinder::Find(&vec);
-
+	
 	wcout.imbue(locale("kor"));
 	wchar_t str[256] = { 0 };
 	for (auto i : vec)
