@@ -13,7 +13,7 @@ public:
 	void PushFront(const T& data);
 
 	template<typename Param>
-	position Insert(position pos, Param data);
+	position Insert(position pos, Param&& data);
 	position GetHeadPos();
 	position GetTailPos();
 	position GetEnd();
@@ -58,7 +58,7 @@ linkedlist<T>::~linkedlist()
 }
 
 template<class T> template<typename Param>
-position linkedlist<T>::Insert(position pos, Param data)
+position linkedlist<T>::Insert(position pos, Param&& data)
 {
 	node* p = static_cast<node*>(pos);
 	auto* left = p;
