@@ -1,126 +1,98 @@
-#include <list>
-#include <iostream>
-#include <queue>
-using namespace std;
+#include "Astar.h"
 
-int g_map[5][7] =
+Astar::Astar(int width, int height, map_type map, point start, point end)
+	: mWidth(width), mHeigth(height), mpMap(map), mStart(start), mEnd(end)
+	, mCompare([](node_ptr left, node_ptr right) { return *left < *right; })
+	, mOpenList(mCompare), mCloseList(mCompare)
 {
-	{0,0,0,0,0,0,0},
-	{0,0,0,1,0,0,0},
-	{0,0,0,1,0,0,0},
-	{0,0,0,1,0,0,0},
-	{0,0,0,0,0,0,0}
-};
-
-struct node
-{
-	int y;
-	int x;
-	node* parent;
-	int G;
-	int H;
-
-	int F() const
-	{
-		return G + H;
-	}
-
-	bool operator>(const node& t) const 
-	{
-		return F() > t.F();
-	}
-
-	bool operator<(const node& t) const
-	{
-		return F() < t.F();
-	}
-
-	bool operator==(const node& t) const
-	{
-		return x == t.x && y == t.y;
-	}
-};
-
-bool isValid(int y, int x)
-{
-	return 0 <= y && y < 5 && 0 <= x && x < 7 && !g_map[y][x];
 }
 
-int getH(int y, int x)
+node* Astar::operator()()
 {
-	return 10 * (abs(2 - y) + abs(5 - x));
-}
-
-bool isClosed(const node& n, const list<node>& l)
-{
-	for (const auto& i : l)
-	{
-		if (n == i)
-			return true;
-	}
-	return false;
-}
-
-bool isOpen(const node& n, const list<node>& l)
-{
-	for (const auto& i : l)
-	{
-		if (n == i && n > i)
-			return true;
-	}
-	return false;
-}
-
-int main()
-{
-	node start{ 2, 1, nullptr, 0 };
-	node cur = start;
-	priority_queue<node> openlist;
-	list<node> closelist;
+	static const int row[] = { -1,0,1,1,1,0,-1,-1 };
+	static const int col[] = { -1,-1,-1,0,1,1,1,0 };
 	
-	int row[] = { -1,0,1,1,1,0,-1,-1 };
-	int col[] = { -1,-1,-1,0,1,1,1,0 };
-	openlist.push_back(cur);
-	while (!openlist.empty())
-	{
-		for (int i = 0; i < 8; i++)
-		{
-			if (isValid(cur.y + col[i], cur.x + row[i]) 
-				&& !isClosed(node{ cur.y + col[i], cur.x + row[i] }, closelist))
-			{
-				int G = cur.G + ((i % 2 == 0) ? 14 : 10);
-				int H = getH(cur.y + col[i], cur.x + row[i]);
-				node child{ cur.y + col[i], cur.x + row[i], &cur, G, H };
-				if (!isOpen(child, openlist))
-				{
-					openlist.push_back(child);
-				}
-			}
-		}
+	node_ptr current = nullptr;
+	freeList(mOpenList);
+	freeList(mCloseList);
+	
+	mOpenList.clear();
+	mCloseList.clear();
 
-		if (min(openlist) == node{ 2,5 })
+	mOpenList.insert(new node{ mStart });
+	while (!mOpenList.empty())
+	{
+		current = *mOpenList.begin();
+
+		if ((*mOpenList.begin())->pt == mEnd)
 		{
-			cout << "end";
 			break;
 		}
-		
-		closelist.push_back(openlist.top());
-		openlist.pop();
+
+		mCloseList.insert(*mOpenList.begin());
+		mOpenList.erase(mOpenList.begin());		
+
+		for (int i = 0; i < 8; i++)
+		{
+			auto newPt = make_pair(current->pt.first + col[i], current->pt.second + row[i]);
+			if (!isValid(newPt) 
+				|| findOnList(mCloseList, newPt) != mCloseList.end())
+				continue;
+
+			int newNodeG = current->G + ((i % 2 == 0) ? 14 : 10);
+			auto pSuccess = findOnList(mOpenList, newPt);
+			if (pSuccess == mOpenList.end())
+			{
+				node* child = new node{ newPt, current };
+				child->G = newNodeG;
+				child->H = calculateH(child);
+				mOpenList.insert(child);
+			}
+			else if (newNodeG < (*pSuccess)->G)
+			{
+				mOpenList.erase(pSuccess);
+				node* child = new node{ newPt, current };
+				child->G = newNodeG;
+				child->H = calculateH(child);
+				mOpenList.insert(child);
+			}
+		}
 	}
-	
-
-
-	/*
-	while (!openlist.empty())
-	{
-		const node* top = &openlist.top();
-		cout << "(" << top->y << ", " << top->x << ") ";
-		cout << "G:" << top->G << " H:" << top->H << " F:" << top->F() << endl;
-		openlist.pop();
-	}
-	*/
-	cin.get();
-
-
+	return current;
 }
 
+void Astar::freeList(const list_type& ls)
+{
+	for (const auto& pointer : ls)
+	{
+		delete pointer;
+	}
+}
+
+bool Astar::isValid(point pt)
+{
+	return 0 <= pt.first && pt.first < mWidth \
+		&& 0 <= pt.second && pt.second < mHeigth \
+		&& !mpMap[pt.first][pt.second];
+}
+
+Astar::node_iterator Astar::findOnList(const list_type& ls, point pt)
+{
+	for (auto itr = ls.begin(); itr != ls.end(); ++itr)
+	{
+		if ((*itr)->pt == pt)
+			return itr;
+	}
+	return ls.end();
+}
+
+int Astar::calculateH(const node_ptr n)
+{
+	return 10 * (abs(mEnd.first - n->pt.first) + abs(mEnd.second - n->pt.second));
+}
+
+Astar::~Astar()
+{
+	freeList(mOpenList);
+	freeList(mCloseList);
+}
