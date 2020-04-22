@@ -15,21 +15,21 @@ node* Astar::operator()()
 	node_ptr current = nullptr;
 	freeList(mOpenList);
 	freeList(mCloseList);
-	
+
 	mOpenList.clear();
 	mCloseList.clear();
 
-	mOpenList.insert(new node{ mStart });
+	mOpenList.insert(new node{ mStart, nullptr });
 	while (!mOpenList.empty())
 	{
 		current = *mOpenList.begin();
 
-		if ((*mOpenList.begin())->pt == mEnd)
+		if (current->pt == mEnd)
 		{
 			break;
 		}
 
-		mCloseList.insert(*mOpenList.begin());
+		mCloseList.insert(current);
 		mOpenList.erase(mOpenList.begin());		
 
 		for (int i = 0; i < 8; i++)
@@ -41,20 +41,23 @@ node* Astar::operator()()
 
 			int newNodeG = current->G + ((i % 2 == 0) ? 14 : 10);
 			auto pSuccess = findOnList(mOpenList, newPt);
+
+
+			node* child = new node{ newPt, current };
+			child->G = newNodeG;
+			child->H = calculateH(child);
 			if (pSuccess == mOpenList.end())
 			{
-				node* child = new node{ newPt, current };
-				child->G = newNodeG;
-				child->H = calculateH(child);
 				mOpenList.insert(child);
 			}
 			else if (newNodeG < (*pSuccess)->G)
 			{
 				mOpenList.erase(pSuccess);
-				node* child = new node{ newPt, current };
-				child->G = newNodeG;
-				child->H = calculateH(child);
 				mOpenList.insert(child);
+			}
+			else
+			{
+				delete child;
 			}
 		}
 	}

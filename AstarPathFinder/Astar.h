@@ -37,7 +37,7 @@ public:
 	using node_ptr = node*;
 	using map_type = int**;
 	using compare_type = bool(*)(node_ptr, node_ptr);
-	using list_type = set<node_ptr, compare_type>;
+	using list_type = multiset<node_ptr, compare_type>;
 	using node_iterator = list_type::iterator;
 
 public:
