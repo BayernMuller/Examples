@@ -12,20 +12,9 @@ struct node
 	int G;
 	int H;
 
-	int F() const
-	{
-		return G + H;
-	}
-
-	bool operator<(const node& t) const
-	{
-		return F() < t.F();
-	}
-
-	bool operator==(const node& t) const
-	{
-		return pt == t.pt;
-	}
+	node(point _pt, node* _parent = nullptr)
+		: pt(_pt), parent(_parent) {}
+	int F() {return G + H;}
 };
 
 
@@ -37,11 +26,11 @@ public:
 	using node_ptr = node*;
 	using map_type = int**;
 	using compare_type = bool(*)(node_ptr, node_ptr);
-	using list_type = set<node_ptr, compare_type>;
+	using list_type = multiset<node_ptr, compare_type>;
 	using node_iterator = list_type::iterator;
-
+	
 public:
-	Astar(int width, int height, map_type map, point start, point end);
+	Astar(int height, int width, map_type map, point start, point end);
 	~Astar();
 
 	node* operator()();
@@ -50,7 +39,7 @@ private:
 	void freeList(const list_type& ls);
 	bool isValid(point pt);
 	node_iterator findOnList(const list_type& ls, point pt);
-	int calculateH(const node_ptr n);
+	int calculateH(point n);
 
 private:
 	compare_type mCompare;
