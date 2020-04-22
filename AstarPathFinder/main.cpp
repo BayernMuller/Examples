@@ -37,5 +37,6 @@ int main()
 		delete[] map[i];
 	}
 	delete[] map;
+	cin.get();
 }
 
