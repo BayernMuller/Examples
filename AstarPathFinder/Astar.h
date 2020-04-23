@@ -33,7 +33,8 @@ public:
 	Astar(int height, int width, map_type map, point start, point end);
 	~Astar();
 
-	node* operator()();
+	node* FindPath();
+	node* OneStep();
 
 private:
 	void freeList(const list_type& ls);
@@ -46,10 +47,13 @@ private:
 	list_type mOpenList;
 	list_type mCloseList;
 	map_type mpMap;
+	node_ptr mpCurrent;
 	const point mStart;
 	const point mEnd;
 	const int mWidth;
 	const int mHeigth;
+	static const int mRow[8];
+	static const int mCol[8];
 };
 
 
