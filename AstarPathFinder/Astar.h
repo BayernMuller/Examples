@@ -26,7 +26,7 @@ public:
 	using node_ptr = node*;
 	using map_type = int**;
 	using compare_type = bool(*)(node_ptr, node_ptr);
-	using list_type = multiset<node_ptr, compare_type>;
+	using list_type = list<node_ptr>;
 	using node_iterator = list_type::iterator;
 	
 public:
@@ -39,7 +39,7 @@ public:
 private:
 	void freeList(const list_type& ls);
 	bool isValid(point pt);
-	node_iterator findOnList(const list_type& ls, point pt);
+	node_ptr findOnList(const list_type& ls, point pt);
 	int calculateH(point n);
 
 private:
