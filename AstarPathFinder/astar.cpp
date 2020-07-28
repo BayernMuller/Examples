@@ -1,67 +1,74 @@
 #include "Astar.h"
 
-Astar::Astar(int width, int height, map_type map, point start, point end)
+const int Astar::mRow[] = { -1 ,0 ,1 ,1 ,1 ,0 ,-1 ,-1 };
+const int Astar::mCol[] = { -1, -1, -1, 0, 1, 1, 1, 0 };
+// initialize static member variables
+
+Astar::Astar(int height, int width, map_type map, point start, point end)
 	: mWidth(width), mHeigth(height), mpMap(map), mStart(start), mEnd(end)
-	, mCompare([](node_ptr left, node_ptr right) { return *left < *right; })
-	, mOpenList(mCompare), mCloseList(mCompare)
+	, mCompare([](node_ptr left, node_ptr right) { return left->F() < right->F(); })
+	/*, mOpenList(mCompare), mCloseList(mCompare)*/, mpCurrent(nullptr)
 {
 }
 
-node* Astar::operator()()
+node* Astar::FindPath()
 {
-	static const int row[] = { -1,0,1,1,1,0,-1,-1 };
-	static const int col[] = { -1,-1,-1,0,1,1,1,0 };
-	
-	node_ptr current = nullptr;
+	mpCurrent = nullptr;
 	freeList(mOpenList);
 	freeList(mCloseList);
-
 	mOpenList.clear();
 	mCloseList.clear();
-
-	mOpenList.insert(new node{ mStart, nullptr });
+	mOpenList.push_back(new node(mStart));
 	while (!mOpenList.empty())
 	{
-		current = *mOpenList.begin();
-
-		if (current->pt == mEnd)
+		auto path = OneStep();
+		if (path)
 		{
-			break;
-		}
-
-		mCloseList.insert(current);
-		mOpenList.erase(mOpenList.begin());		
-
-		for (int i = 0; i < 8; i++)
-		{
-			auto newPt = make_pair(current->pt.first + col[i], current->pt.second + row[i]);
-			if (!isValid(newPt) 
-				|| findOnList(mCloseList, newPt) != mCloseList.end())
-				continue;
-
-			int newNodeG = current->G + ((i % 2 == 0) ? 14 : 10);
-			auto pSuccess = findOnList(mOpenList, newPt);
-
-
-			node* child = new node{ newPt, current };
-			child->G = newNodeG;
-			child->H = calculateH(child);
-			if (pSuccess == mOpenList.end())
-			{
-				mOpenList.insert(child);
-			}
-			else if (newNodeG < (*pSuccess)->G)
-			{
-				mOpenList.erase(pSuccess);
-				mOpenList.insert(child);
-			}
-			else
-			{
-				delete child;
-			}
+			return path;
 		}
 	}
-	return current;
+	return nullptr;
+}
+
+node* Astar::OneStep()
+{
+	mpCurrent = *mOpenList.begin();
+	for (auto n : mOpenList)
+		if (n->F() < mpCurrent->F())
+			mpCurrent = n;
+
+	if (mpCurrent->pt == mEnd)
+	{
+		return mpCurrent;
+	}
+
+	mCloseList.push_back(mpCurrent);
+	mOpenList.erase(find(mOpenList.begin(), mOpenList.end(), mpCurrent));
+
+	for (int i = 0; i < 8; i++)
+	{
+		point newPt = make_pair(mpCurrent->pt.first + mCol[i], mpCurrent->pt.second + mRow[i]);
+		if (!isValid(newPt) || findOnList(mCloseList, newPt))
+		{
+			continue;
+		}
+
+		int newNodeG = mpCurrent->G + ((i % 2 == 0) ? 14 : 10);
+		auto pSuccess = findOnList(mOpenList, newPt);
+		if (!pSuccess)
+		{
+			auto newNode = new node(newPt, mpCurrent);
+			newNode->G = newNodeG;
+			newNode->H = calculateH(newPt);
+			mOpenList.push_back(newNode);
+		}
+		else if (newNodeG < pSuccess->G)
+		{
+			pSuccess->parent = mpCurrent;
+			pSuccess->G = newNodeG;
+		}
+	}
+	return nullptr;
 }
 
 void Astar::freeList(const list_type& ls)
@@ -74,24 +81,24 @@ void Astar::freeList(const list_type& ls)
 
 bool Astar::isValid(point pt)
 {
-	return 0 <= pt.first && pt.first < mWidth \
-		&& 0 <= pt.second && pt.second < mHeigth \
+	return 0 <= pt.first && pt.first < mHeigth \
+		&& 0 <= pt.second && pt.second < mWidth \
 		&& !mpMap[pt.first][pt.second];
 }
 
-Astar::node_iterator Astar::findOnList(const list_type& ls, point pt)
+Astar::node_ptr Astar::findOnList(const list_type& ls, point pt)
 {
-	for (auto itr = ls.begin(); itr != ls.end(); ++itr)
+	for (auto n : ls)
 	{
-		if ((*itr)->pt == pt)
-			return itr;
+		if (n->pt == pt)
+			return n;
 	}
-	return ls.end();
+	return nullptr;
 }
 
-int Astar::calculateH(const node_ptr n)
+int Astar::calculateH(point pt)
 {
-	return 10 * (abs(mEnd.first - n->pt.first) + abs(mEnd.second - n->pt.second));
+	return 10 * (abs(mEnd.first - pt.first) + abs(mEnd.second - pt.second));
 }
 
 Astar::~Astar()

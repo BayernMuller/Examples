@@ -12,20 +12,9 @@ struct node
 	int G;
 	int H;
 
-	int F() const
-	{
-		return G + H;
-	}
-
-	bool operator<(const node& t) const
-	{
-		return F() < t.F();
-	}
-
-	bool operator==(const node& t) const
-	{
-		return pt == t.pt;
-	}
+	node(point _pt, node* _parent = nullptr)
+		: pt(_pt), parent(_parent) {}
+	int F() {return G + H;}
 };
 
 
@@ -37,30 +26,34 @@ public:
 	using node_ptr = node*;
 	using map_type = int**;
 	using compare_type = bool(*)(node_ptr, node_ptr);
-	using list_type = multiset<node_ptr, compare_type>;
+	using list_type = list<node_ptr>;
 	using node_iterator = list_type::iterator;
-
+	
 public:
-	Astar(int width, int height, map_type map, point start, point end);
+	Astar(int height, int width, map_type map, point start, point end);
 	~Astar();
 
-	node* operator()();
+	node* FindPath();
+	node* OneStep();
 
 private:
 	void freeList(const list_type& ls);
 	bool isValid(point pt);
-	node_iterator findOnList(const list_type& ls, point pt);
-	int calculateH(const node_ptr n);
+	node_ptr findOnList(const list_type& ls, point pt);
+	int calculateH(point n);
 
 private:
 	compare_type mCompare;
 	list_type mOpenList;
 	list_type mCloseList;
 	map_type mpMap;
+	node_ptr mpCurrent;
 	const point mStart;
 	const point mEnd;
 	const int mWidth;
 	const int mHeigth;
+	static const int mRow[8];
+	static const int mCol[8];
 };
 
 

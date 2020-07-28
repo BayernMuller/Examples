@@ -6,20 +6,17 @@ int main()
 {
 	int** map;
 	map = new int* [5];
-	map[0] = new int[7]{ 0,0,0,0,0,0,0 };
-	map[1] = new int[7]{ 0,0,0,1,0,0,0 };
-	map[2] = new int[7]{ 0,0,0,1,0,0,0 };
-	map[3] = new int[7]{ 0,0,0,1,0,0,0 };
-	map[4] = new int[7]{ 0,0,0,0,0,0,0 };
+	map[0] = new int[7]{ 0,0,0,1,0,0,0 };
+	map[1] = new int[7]{ 0,0,0,1,0,1,0 };
+	map[2] = new int[7]{ 0,0,1,1,0,1,0 };
+	map[3] = new int[7]{ 0,1,1,0,0,1,0 };
+	map[4] = new int[7]{ 0,0,0,0,0,1,0 };
 
-
-	Astar path(7, 5, map, { 2,1 }, { 2,5 });
-
-	auto node = path();
+	Astar path(5, 7, map, { 2,1 }, { 4,6 });
+	auto node = path.FindPath();
 	while (node)
 	{
-		cout << node->pt.first << " " << node->pt.second << endl;
-		map[node->pt.first][node->pt.second] = 9;
+		map[node->pt.first][node->pt.second] = 7;
 		node = node->parent;
 	}
 
@@ -27,9 +24,9 @@ int main()
 	{
 		for (int j = 0; j < 7; j++)
 		{
-			cout << map[i][j] << ' ';
+			cout << map[i][j] << "   ";
 		}
-		cout << endl;
+		cout << endl << endl;
 	}
 
 	for (int i = 0; i < 5; i++)
@@ -37,6 +34,5 @@ int main()
 		delete[] map[i];
 	}
 	delete[] map;
-	cin.get();
 }
 
