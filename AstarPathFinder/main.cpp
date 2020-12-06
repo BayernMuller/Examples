@@ -1,38 +1,21 @@
-#include <iostream>
-#include "Astar.h"
-using namespace std;
+#include <stdio.h>
+
+int stare(int left, int weak = 0)
+{
+	if (weak)
+		weak--;
+	if (!left)
+		return 1;
+	int sum = stare(left - 1);
+	if (left > 1)
+		sum += stare(left - 2);
+	if (left > 2 && weak == 0)
+		sum += stare(left - 3, 3);
+	return sum;
+}
 
 int main()
 {
-	int** map;
-	map = new int* [5];
-	map[0] = new int[7]{ 0,0,0,1,0,0,0 };
-	map[1] = new int[7]{ 0,0,0,1,0,1,0 };
-	map[2] = new int[7]{ 0,0,1,1,0,1,0 };
-	map[3] = new int[7]{ 0,1,1,0,0,1,0 };
-	map[4] = new int[7]{ 0,0,0,0,0,1,0 };
-
-	Astar path(5, 7, map, { 2,1 }, { 4,6 });
-	auto node = path.FindPath();
-	while (node)
-	{
-		map[node->pt.first][node->pt.second] = 7;
-		node = node->parent;
-	}
-
-	for (int i = 0; i < 5; i++)
-	{
-		for (int j = 0; j < 7; j++)
-		{
-			cout << map[i][j] << "   ";
-		}
-		cout << endl << endl;
-	}
-
-	for (int i = 0; i < 5; i++)
-	{
-		delete[] map[i];
-	}
-	delete[] map;
+	printf("%d\n", stare(3));
 }
 
