@@ -17,7 +17,7 @@ Now_cds = ''
 temperature = []
 humidity = []
 cds = []
-
+PyQt5.QtWidgets.QApplication.setAttribute(PyQt5.QtCore.Qt.AA_EnableHighDpiScaling, True) # for big screen.
 '''
 ser = serial.Serial(port='COM6',
                     baudrate=9600,
