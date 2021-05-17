@@ -1,12 +1,15 @@
 from con_gui import *
 from functools import partial
 from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import Qt
 import sys
 import serial
 import asyncio
 import serial_asyncio
 from threading import Thread
 
+QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
 
 class connectObject(Ui_Form):
 	is_connect = False

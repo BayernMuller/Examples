@@ -21,3 +21,4 @@ class handle_finder:
 		if win32gui.GetParent(hwnd):
 			return
 		self.list.update({win32gui.GetWindowText(hwnd) : hwnd})
+
